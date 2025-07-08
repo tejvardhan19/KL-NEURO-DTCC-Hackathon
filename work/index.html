@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyToken (MTK) Contract Interface</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.10.0/web3.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status.success {
+            background: rgba(39, 174, 96, 0.1);
+            color: #27ae60;
+            border: 1px solid rgba(39, 174, 96, 0.2);
+        }
+
+        .status.error {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+
+        .status.info {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.2);
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+        .connection-status.connected {
+            background: rgba(39, 174, 96, 0.9);
+            color: white;
+        }
+
+        .connection-status.disconnected {
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .info-item .label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .info-item .value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status" id="connectionStatus">Not Connected</div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>MyToken (MTK)</h1>
+            <p>ERC-20 Token Contract Interface</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Contract Info Card -->
+            <div class="card">
+                <h3>📊 Contract Information</h3>
+                <div class="form-group">
+                    <label for="contractAddress">Contract Address:</label>
+                    <input type="text" id="contractAddress" placeholder="Enter contract address">
+                </div>
+                <button class="btn" onclick="loadContractInfo()">Load Contract Info</button>
+                
+                <div class="info-grid" id="contractInfo" style="display: none;">
+                    <div class="info-item">
+                        <div class="label">Name</div>
+                        <div class="value" id="tokenName">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Symbol</div>
+                        <div class="value" id="tokenSymbol">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Decimals</div>
+                        <div class="value" id="tokenDecimals">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Total Supply</div>
+                        <div class="value" id="totalSupply">-</div>
+                    </div>
+                </div>
+                
+                <div class="status" id="contractInfoStatus"></div>
+            </div>
+
+            <!-- Balance Check Card -->
+            <div class="card">
+                <h3>💰 Check Balance</h3>
+                <div class="form-group">
+                    <label for="balanceAddress">Address:</label>
+                    <input type="text" id="balanceAddress" placeholder="Enter address to check balance">
+                </div>
+                <button class="btn" onclick="checkBalance()">Check Balance</button>
+                <div class="status" id="balanceStatus"></div>
+            </div>
+
+            <!-- Transfer Card -->
+            <div class="card">
+                <h3>💸 Transfer Tokens</h3>
+                <div class="form-group">
+                    <label for="transferTo">To Address:</label>
+                    <input type="text" id="transferTo" placeholder="Recipient address">
+                </div>
+                <div class="form-group">
+                    <label for="transferAmount">Amount:</label>
+                    <input type="number" id="transferAmount" placeholder="Amount to transfer" step="0.01">
+                </div>
+                <button class="btn" onclick="transferTokens()">Transfer</button>
+                <div class="status" id="transferStatus"></div>
+            </div>
+
+            <!-- Approve Card -->
+            <div class="card">
+                <h3>✅ Approve Spending</h3>
+                <div class="form-group">
+                    <label for="approveSpender">Spender Address:</label>
+                    <input type="text" id="approveSpender" placeholder="Address to approve">
+                </div>
+                <div class="form-group">
+                    <label for="approveAmount">Amount:</label>
+                    <input type="number" id="approveAmount" placeholder="Amount to approve" step="0.01">
+                </div>
+                <button class="btn" onclick="approveSpending()">Approve</button>
+                <div class="status" id="approveStatus"></div>
+            </div>
+
+            <!-- Allowance Check Card -->
+            <div class="card">
+                <h3>🔍 Check Allowance</h3>
+                <div class="form-group">
+                    <label for="allowanceOwner">Owner Address:</label>
+                    <input type="text" id="allowanceOwner" placeholder="Owner address">
+                </div>
+                <div class="form-group">
+                    <label for="allowanceSpender">Spender Address:</label>
+                    <input type="text" id="allowanceSpender" placeholder="Spender address">
+                </div>
+                <button class="btn" onclick="checkAllowance()">Check Allowance</button>
+                <div class="status" id="allowanceStatus"></div>
+            </div>
+
+            <!-- Transfer From Card -->
+            <div class="card">
+                <h3>🔄 Transfer From</h3>
+                <div class="form-group">
+                    <label for="transferFromOwner">From Address:</label>
+                    <input type="text" id="transferFromOwner" placeholder="Owner address">
+                </div>
+                <div class="form-group">
+                    <label for="transferFromTo">To Address:</label>
+                    <input type="text" id="transferFromTo" placeholder="Recipient address">
+                </div>
+                <div class="form-group">
+                    <label for="transferFromAmount">Amount:</label>
+                    <input type="number" id="transferFromAmount" placeholder="Amount to transfer" step="0.01">
+                </div>
+                <button class="btn" onclick="transferFrom()">Transfer From</button>
+                <div class="status" id="transferFromStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let web3;
+        let contract;
+        let userAccount;
+
+        // Contract ABI from your artifact
+        const contractABI = [
+            {
+                "inputs": [],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {"indexed": true, "internalType": "address", "name": "owner", "type": "address"},
+                    {"indexed": true, "internalType": "address", "name": "spender", "type": "address"},
+                    {"indexed": false, "internalType": "uint256", "name": "value", "type": "uint256"}
+                ],
+                "name": "Approval",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {"indexed": true, "internalType": "address", "name": "from", "type": "address"},
+                    {"indexed": true, "internalType": "address", "name": "to", "type": "address"},
+                    {"indexed": false, "internalType": "uint256", "name": "value", "type": "uint256"}
+                ],
+                "name": "Transfer",
+                "type": "event"
+            },
+            {
+                "inputs": [{"internalType": "address", "name": "", "type": "address"}, {"internalType": "address", "name": "", "type": "address"}],
+                "name": "allowance",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "address", "name": "_spender", "type": "address"}, {"internalType": "uint256", "name": "_value", "type": "uint256"}],
+                "name": "approve",
+                "outputs": [{"internalType": "bool", "name": "success", "type": "bool"}],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+                "name": "balanceOf",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "decimals",
+                "outputs": [{"internalType": "uint8", "name": "", "type": "uint8"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "name",
+                "outputs": [{"internalType": "string", "name": "", "type": "string"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "symbol",
+                "outputs": [{"internalType": "string", "name": "", "type": "string"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "totalSupply",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "address", "name": "_to", "type": "address"}, {"internalType": "uint256", "name": "_value", "type": "uint256"}],
+                "name": "transfer",
+                "outputs": [{"internalType": "bool", "name": "success", "type": "bool"}],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "address", "name": "_from", "type": "address"}, {"internalType": "address", "name": "_to", "type": "address"}, {"internalType": "uint256", "name": "_value", "type": "uint256"}],
+                "name": "transferFrom",
+                "outputs": [{"internalType": "bool", "name": "success", "type": "bool"}],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ];
+
+        // Initialize Web3 and connect to MetaMask
+        async function initWeb3() {
+            if (typeof window.ethereum !== 'undefined') {
+                web3 = new Web3(window.ethereum);
+                try {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    const accounts = await web3.eth.getAccounts();
+                    userAccount = accounts[0];
+                    updateConnectionStatus(true);
+                    
+                    // Listen for account changes
+                    window.ethereum.on('accountsChanged', function (accounts) {
+                        userAccount = accounts[0];
+                        updateConnectionStatus(accounts.length > 0);
+                    });
+                } catch (error) {
+                    updateConnectionStatus(false);
+                    showStatus('contractInfoStatus', 'Please connect to MetaMask', 'error');
+                }
+            } else {
+                updateConnectionStatus(false);
+                showStatus('contractInfoStatus', 'MetaMask not detected. Please install MetaMask.', 'error');
+            }
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connectionStatus');
+            if (connected) {
+                statusEl.textContent = `Connected: ${userAccount?.substring(0, 6)}...${userAccount?.substring(38)}`;
+                statusEl.className = 'connection-status connected';
+            } else {
+                statusEl.textContent = 'Not Connected';
+                statusEl.className = 'connection-status disconnected';
+            }
+        }
+
+        function showStatus(elementId, message, type) {
+            const statusEl = document.getElementById(elementId);
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+
+        async function loadContractInfo() {
+            const contractAddress = document.getElementById('contractAddress').value;
+            if (!contractAddress) {
+                showStatus('contractInfoStatus', 'Please enter contract address', 'error');
+                return;
+            }
+
+            try {
+                contract = new web3.eth.Contract(contractABI, contractAddress);
+                
+                const name = await contract.methods.name().call();
+                const symbol = await contract.methods.symbol().call();
+                const decimals = await contract.methods.decimals().call();
+                const totalSupply = await contract.methods.totalSupply().call();
+                
+                document.getElementById('tokenName').textContent = name;
+                document.getElementById('tokenSymbol').textContent = symbol;
+                document.getElementById('tokenDecimals').textContent = decimals;
+                document.getElementById('totalSupply').textContent = web3.utils.fromWei(totalSupply, 'ether');
+                
+                document.getElementById('contractInfo').style.display = 'grid';
+                showStatus('contractInfoStatus', 'Contract info loaded successfully!', 'success');
+            } catch (error) {
+                showStatus('contractInfoStatus', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkBalance() {
+            if (!contract) {
+                showStatus('balanceStatus', 'Please load contract first', 'error');
+                return;
+            }
+
+            const address = document.getElementById('balanceAddress').value || userAccount;
+            if (!address) {
+                showStatus('balanceStatus', 'Please enter address or connect wallet', 'error');
+                return;
+            }
+
+            try {
+                const balance = await contract.methods.balanceOf(address).call();
+                const balanceInTokens = web3.utils.fromWei(balance, 'ether');
+                showStatus('balanceStatus', `Balance: ${balanceInTokens} MTK`, 'success');
+            } catch (error) {
+                showStatus('balanceStatus', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function transferTokens() {
+            if (!contract || !userAccount) {
+                showStatus('transferStatus', 'Please connect wallet and load contract', 'error');
+                return;
+            }
+
+            const to = document.getElementById('transferTo').value;
+            const amount = document.getElementById('transferAmount').value;
+
+            if (!to || !amount) {
+                showStatus('transferStatus', 'Please fill all fields', 'error');
+                return;
+            }
+
+            try {
+                const amountWei = web3.utils.toWei(amount, 'ether');
+                const result = await contract.methods.transfer(to, amountWei).send({ from: userAccount });
+                showStatus('transferStatus', `Transfer successful! Tx: ${result.transactionHash}`, 'success');
+            } catch (error) {
+                showStatus('transferStatus', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function approveSpending() {
+            if (!contract || !userAccount) {
+                showStatus('approveStatus', 'Please connect wallet and load contract', 'error');
+                return;
+            }
+
+            const spender = document.getElementById('approveSpender').value;
+            const amount = document.getElementById('approveAmount').value;
+
+            if (!spender || !amount) {
+                showStatus('approveStatus', 'Please fill all fields', 'error');
+                return;
+            }
+
+            try {
+                const amountWei = web3.utils.toWei(amount, 'ether');
+                const result = await contract.methods.approve(spender, amountWei).send({ from: userAccount });
+                showStatus('approveStatus', `Approval successful! Tx: ${result.transactionHash}`, 'success');
+            } catch (error) {
+                showStatus('approveStatus', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkAllowance() {
+            if (!contract) {
+                showStatus('allowanceStatus', 'Please load contract first', 'error');
+                return;
+            }
+
+            const owner = document.getElementById('allowanceOwner').value;
+            const spender = document.getElementById('allowanceSpender').value;
+
+            if (!owner || !spender) {
+                showStatus('allowanceStatus', 'Please fill all fields', 'error');
+                return;
+            }
+
+            try {
+                const allowance = await contract.methods.allowance(owner, spender).call();
+                const allowanceInTokens = web3.utils.fromWei(allowance, 'ether');
+                showStatus('allowanceStatus', `Allowance: ${allowanceInTokens} MTK`, 'success');
+            } catch (error) {
+                showStatus('allowanceStatus', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function transferFrom() {
+            if (!contract || !userAccount) {
+                showStatus('transferFromStatus', 'Please connect wallet and load contract', 'error');
+                return;
+            }
+
+            const from = document.getElementById('transferFromOwner').value;
+            const to = document.getElementById('transferFromTo').value;
+            const amount = document.getElementById('transferFromAmount').value;
+
+            if (!from || !to || !amount) {
+                showStatus('transferFromStatus', 'Please fill all fields', 'error');
+                return;
+            }
+
+            try {
+                const amountWei = web3.utils.toWei(amount, 'ether');
+                const result = await contract.methods.transferFrom(from, to, amountWei).send({ from: userAccount });
+                showStatus('transferFromStatus', `Transfer successful! Tx: ${result.transactionHash}`, 'success');
+            } catch (error) {
+                showStatus('transferFromStatus', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', initWeb3);
+    </script>
+</body>
+</html>
